@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,6 +14,8 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -40,11 +44,13 @@ import com.clj.blesample.operation.OperationActivity;
 import com.clj.fastble.BleManager;
 import com.clj.fastble.callback.BleGattCallback;
 import com.clj.fastble.callback.BleMtuChangedCallback;
+import com.clj.fastble.callback.BleNotifyCallback;
 import com.clj.fastble.callback.BleRssiCallback;
 import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.data.BleDevice;
 import com.clj.fastble.exception.BleException;
 import com.clj.fastble.scan.BleScanRuleConfig;
+import com.clj.fastble.utils.HexUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +73,74 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Animation operatingAnim;
     private DeviceAdapter mDeviceAdapter;
     private ProgressDialog progressDialog;
+
+    private List<BleDevice> scanResultList;
+
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(@NonNull final Message msg) {
+            super.handleMessage(msg);
+            if (msg.what < scanResultList.size()) {
+                BleManager.getInstance().connect(scanResultList.get(msg.what), new BleGattCallback() {
+                    @Override
+                    public void onStartConnect() {
+                    }
+
+                    @Override
+                    public void onConnectFail(BleDevice bleDevice, BleException exception) {
+                        img_loading.clearAnimation();
+                        img_loading.setVisibility(View.INVISIBLE);
+                        btn_scan.setText(getString(R.string.start_scan));
+                        msg.what += 1;
+                        handler.sendEmptyMessage(msg.what);
+                    }
+
+                    @Override
+                    public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
+                        mDeviceAdapter.addDevice(bleDevice);
+                        mDeviceAdapter.notifyDataSetChanged();
+
+                        if (msg.what <= scanResultList.size() - 1) {
+                            msg.what += 1;
+                            handler.sendEmptyMessage(msg.what);
+                        }
+                        final List<BluetoothGattService> gServicelist = gatt.getServices();
+                        if (gServicelist.size() == 4 && BluetoothGattCharacteristic.PROPERTY_NOTIFY > 0) {
+                            BleManager.getInstance().notify(
+                                    bleDevice,
+                                    gServicelist.get(2).getCharacteristics().get(0).getUuid().toString(),
+                                    gServicelist.get(2).getCharacteristics().get(0).getUuid().toString(),
+                                    new BleNotifyCallback() {
+
+                                        @Override
+                                        public void onNotifySuccess() {
+                                            Log.d("lsy", "onNotifySuccess");
+                                        }
+
+                                        @Override
+                                        public void onNotifyFailure(final BleException exception) {
+
+                                        }
+
+                                        @Override
+                                        public void onCharacteristicChanged(byte[] data) {
+                                            Log.d("lsy", HexUtil.getResult(gServicelist.get(2).getCharacteristics().get(1).getValue(), true) + "");
+                                        }
+                                    });
+                        }
+
+
+                    }
+
+                    @Override
+                    public void onDisConnected(boolean isActiveDisConnected, BleDevice bleDevice, BluetoothGatt gatt, int status) {
+
+
+                    }
+                });
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -250,12 +324,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onScanning(BleDevice bleDevice) {
-                mDeviceAdapter.addDevice(bleDevice);
-                mDeviceAdapter.notifyDataSetChanged();
+
+                if (!(TextUtils.isEmpty(bleDevice.getName())) && bleDevice.getName().contains("HX_TNS")) {
+                    mDeviceAdapter.addDevice(bleDevice);
+                    mDeviceAdapter.notifyDataSetChanged();
+                }
+
             }
 
             @Override
-            public void onScanFinished(List<BleDevice> scanResultList) {
+            public void onScanFinished(final List<BleDevice> scanResultList) {
+                if (scanResultList.size() > 0) {
+                    MainActivity.this.scanResultList = scanResultList;
+                    handler.sendEmptyMessage(0);
+                }
                 img_loading.clearAnimation();
                 img_loading.setVisibility(View.INVISIBLE);
                 btn_scan.setText(getString(R.string.start_scan));
@@ -289,7 +371,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onDisConnected(boolean isActiveDisConnected, BleDevice bleDevice, BluetoothGatt gatt, int status) {
                 progressDialog.dismiss();
-
                 mDeviceAdapter.removeDevice(bleDevice);
                 mDeviceAdapter.notifyDataSetChanged();
 
