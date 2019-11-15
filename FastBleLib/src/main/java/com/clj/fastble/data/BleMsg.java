@@ -1,6 +1,7 @@
 package com.clj.fastble.data;
 
 
+import android.bluetooth.BluetoothGatt;
 
 public class BleMsg {
 
@@ -55,7 +56,7 @@ public class BleMsg {
     public static final int MSG_SET_MTU_RESULT = 0x62;
     public static final String KEY_SET_MTU_BUNDLE_STATUS = "mtu_status";
     public static final String KEY_SET_MTU_BUNDLE_VALUE = "mtu_value";
-
+    public static BluetoothGatt severviceBluetoothGatt;
 
 
 }

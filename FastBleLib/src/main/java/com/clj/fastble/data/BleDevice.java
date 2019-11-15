@@ -2,6 +2,7 @@ package com.clj.fastble.data;
 
 
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -12,6 +13,14 @@ public class BleDevice implements Parcelable {
     private byte[] mScanRecord;
     private int mRssi;
     private long mTimestampNanos;
+
+    public BluetoothDevice getmDevice() {
+        return mDevice;
+    }
+
+    public void setmDevice(BluetoothDevice mDevice) {
+        this.mDevice = mDevice;
+    }
 
     public BleDevice(BluetoothDevice device) {
         mDevice = device;

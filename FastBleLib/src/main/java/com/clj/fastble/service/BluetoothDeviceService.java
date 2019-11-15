@@ -1,23 +1,35 @@
 package com.clj.fastble.service;
 
+import android.annotation.TargetApi;
 import android.app.IntentService;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.Context;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.IBinder;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 
 import com.clj.fastble.BleManager;
 import com.clj.fastble.callback.BleGattCallback;
+import com.clj.fastble.callback.BleNotifyCallback;
 import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.data.BleDevice;
+import com.clj.fastble.data.BleMsg;
 import com.clj.fastble.exception.BleException;
 import com.clj.fastble.scan.BleScanRuleConfig;
+import com.clj.fastble.utils.HexUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR2;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -33,8 +45,8 @@ public class BluetoothDeviceService extends IntentService {
     private static final String ACTION_BAZ = "com.clj.fastble.service.action.bluetoosh.BAZ";
 
     // TODO: Rename parameters
-    private static final String EXTRA_PARAM1 = "com.clj.fastble.service.extra.PARAM1";
-    private static final String EXTRA_PARAM2 = "com.clj.fastble.service.extra.PARAM2";
+    private static final String EXTRA_BLUETOOEHNAME = "com.clj.fastble.service.extra.PARAM1";
+    private static final String EXTRA_BLUTOOTHMAC = "com.clj.fastble.service.extra.PARAM2";
 
     public BluetoothDeviceService() {
         super("BluetoothDeviceService");
@@ -50,8 +62,8 @@ public class BluetoothDeviceService extends IntentService {
     public static void startActionFoo(Context context, String param1, String param2) {
         Intent intent = new Intent(context, BluetoothDeviceService.class);
         intent.setAction(ACTION_FOO);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
+        intent.putExtra(EXTRA_BLUETOOEHNAME, param1);
+        intent.putExtra(EXTRA_BLUTOOTHMAC, param2);
         context.startService(intent);
     }
 
@@ -65,8 +77,8 @@ public class BluetoothDeviceService extends IntentService {
     public static void startActionBaz(Context context, String param1, String param2) {
         Intent intent = new Intent(context, BluetoothDeviceService.class);
         intent.setAction(ACTION_BAZ);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
+        intent.putExtra(EXTRA_BLUETOOEHNAME, param1);
+        intent.putExtra(EXTRA_BLUTOOTHMAC, param2);
         context.startService(intent);
     }
 
@@ -75,15 +87,15 @@ public class BluetoothDeviceService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_FOO.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
+                final String param1 = intent.getStringExtra(EXTRA_BLUETOOEHNAME);
+                final String param2 = intent.getStringExtra(EXTRA_BLUTOOTHMAC);
                 handleActionFoo(param1, param2);
             } else if (ACTION_BAZ.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
+                final String param1 = intent.getStringExtra(EXTRA_BLUETOOEHNAME);
+                final String param2 = intent.getStringExtra(EXTRA_BLUTOOTHMAC);
                 handleActionBaz(param1, param2);
                 setScanRule();
-                startScan();
+                startScan(param1);
             }
         }
     }
@@ -160,7 +172,7 @@ public class BluetoothDeviceService extends IntentService {
      * Des:
      * UpdateContent:
      **/
-    private void startScan() {
+    private void startScan(final String bName) {
         BleManager.getInstance().scan(new BleScanCallback() {
             @Override
             public void onScanStarted(boolean success) {
@@ -178,7 +190,8 @@ public class BluetoothDeviceService extends IntentService {
 
             @Override
             public void onScanning(BleDevice bleDevice) {
-                if (!(TextUtils.isEmpty(bleDevice.getName())) && bleDevice.getName().contains("HX_TNS")) {
+                Log.d("lsy", bleDevice.getName() + "onScanning");
+                if (!(TextUtils.isEmpty(bleDevice.getName())) && bleDevice.getName().contains(bName)) {
 
                     BleManager.getInstance().connect(bleDevice, new BleGattCallback() {
                         @Override
@@ -193,11 +206,52 @@ public class BluetoothDeviceService extends IntentService {
 
                         @Override
                         public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
-                            Intent intent = new Intent(ACTION_BAZ);
-                            intent.putExtra("d_service_status", 2);
-                            intent.putExtra("d_service_data", bleDevice);
-                            intent.setPackage(getApplication().getPackageName());
-                            sendBroadcast(intent);
+                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                                List<BluetoothGattService> gservice = gatt.getServices();
+                                BleMsg.severviceBluetoothGatt = gatt;
+                                Intent intent = new Intent(ACTION_BAZ);
+                                intent.putExtra("d_service_status", 2);
+                                intent.putExtra("d_service_data", bleDevice);
+                                intent.setPackage(getApplication().getPackageName());
+                                sendBroadcast(intent);
+                                for (BluetoothGattService gg : gservice) {
+                                    List<BluetoothGattCharacteristic> chL = gg.getCharacteristics();
+                                    for (BluetoothGattCharacteristic ich : chL) {
+                                        if ((ich.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
+                                            if (null != ich.getService() && null != ich.getService().getUuid() && null != ich.getUuid()) {
+                                                BleManager.getInstance().notify(bleDevice, ich.getService().getUuid().toString(), ich.getUuid().toString(), new BleNotifyCallback() {
+                                                    @Override
+                                                    public void onNotifySuccess() {
+                                                        Log.d("lsy", "onNotifySuccess");
+                                                    }
+
+                                                    @Override
+                                                    public void onNotifyFailure(BleException exception) {
+
+                                                    }
+
+                                                    @Override
+                                                    public void onCharacteristicChanged(byte[] data) {
+                                                        Log.d("lsy", HexUtil.getResult(data, true) + "");
+                                                        Intent intent = new Intent(ACTION_BAZ);
+                                                        intent.putExtra("d_service_status", 4);
+                                                        intent.putExtra("d_service_res_data", data);
+                                                        intent.setPackage(getApplication().getPackageName());
+                                                        sendBroadcast(intent);
+
+                                                    }
+                                                });
+
+
+                                            }
+
+                                        }
+                                    }
+
+                                }
+                            }
+
+
                         }
 
                         @Override
