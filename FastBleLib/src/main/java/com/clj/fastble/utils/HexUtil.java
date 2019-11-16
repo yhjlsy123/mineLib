@@ -5,6 +5,7 @@ import android.util.Log;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class HexUtil {
 
@@ -72,18 +73,37 @@ public class HexUtil {
      * Autor:Administrator
      * CreatedTime:2019/11/12 0012
      * UpdateTime:2019/11/12 0012 13:26
-     * Des:单位0.1mm
+     * Des:单位0.1mm 字节长度9
      * UpdateContent:
      **/
     public static int getResult(byte[] data, boolean addSpace) {
         String strOrResutl = HexUtil.formatHexString(data, true);
         List<String> listResult = Arrays.asList(strOrResutl.split(" "));
-        String hString = listResult.subList(4, 6).toString().replace(",", "").replace("[", "").replace("]", "").replaceAll("\\s*", "");
-        String lString = listResult.subList(6, 8).toString().replace(",", "").replace("[", "").replace("]", "").replaceAll("\\s*", "");
+        if (listResult.size() == 9 && Pattern.compile("b[0-4]").matcher(listResult.get(2)).matches()) {
+            return getRular(listResult);
+        }
+        if (listResult.size() == 12 && listResult.get(2).equals("03")) {
+            return getThermometer(listResult);
+        }
+        return 0;
+
+    }
+
+    /**
+     * Autor:Administrator
+     * CreatedTime:2019/11/16 0016
+     * UpdateTime:2019/11/16 0016 13:34
+     * Des:腰尺
+     * UpdateContent:
+     **/
+    private static int getRular(List<String> lisResult) {
+        String hString = lisResult.subList(4, 6).toString().replace(",", "").replace("[", "").replace("]", "").replaceAll("\\s*", "");
+        String lString = lisResult.subList(6, 8).toString().replace(",", "").replace("[", "").replace("]", "").replaceAll("\\s*", "");
         int hRes = new BigInteger("ffff", 16).intValue() - new BigInteger(hString, 16).intValue();
         int lRes = new BigInteger("ffff", 16).intValue() - new BigInteger(lString, 16).intValue();
         return (16 * 16 * 16 * 16 - 1) * hRes + hRes + lRes;
     }
+
 
     /**
      * Autor:Administrator
@@ -92,12 +112,9 @@ public class HexUtil {
      * Des:获取体温计,字节长度11,位置2是02H
      * UpdateContent:
      **/
-    public static int getThermometer(byte[] data, boolean addSpace) {
-        String strOrResutl = HexUtil.formatHexString(data, true);
-        Log.d("lsy", strOrResutl);
-        List<String> listResult = Arrays.asList(strOrResutl.split(" "));
-        if (listResult.size() == 12) {
-            int resResult = new BigInteger("ff", 16).intValue() - new BigInteger(listResult.get(9), 16).intValue() + (new BigInteger("ff", 16).intValue() - new BigInteger(listResult.get(10), 16).intValue()) * 16 + (new BigInteger("ff", 16).intValue() - new BigInteger(listResult.get(11), 16).intValue()) * 16 * 16;
+    private static int getThermometer(List<String> lisResult) {
+        if (lisResult.size() == 12) {
+            int resResult = new BigInteger("ff", 16).intValue() - new BigInteger(lisResult.get(9), 16).intValue() + (new BigInteger("ff", 16).intValue() - new BigInteger(lisResult.get(10), 16).intValue()) * 16 + (new BigInteger("ff", 16).intValue() - new BigInteger(lisResult.get(11), 16).intValue()) * 16 * 16;
             return resResult;
         } else {
             return 0;

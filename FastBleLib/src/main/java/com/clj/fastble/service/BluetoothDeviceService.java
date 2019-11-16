@@ -233,6 +233,7 @@ public class BluetoothDeviceService extends IntentService {
                                                     @Override
                                                     public void onCharacteristicChanged(byte[] data) {
                                                         Log.d("lsy", HexUtil.getResult(data, true) + "");
+
                                                         Intent intent = new Intent(ACTION_BAZ);
                                                         intent.putExtra("d_service_status", 4);
                                                         intent.putExtra("d_service_res_data", data);
