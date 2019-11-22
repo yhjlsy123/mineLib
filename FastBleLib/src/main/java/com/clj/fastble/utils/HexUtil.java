@@ -83,17 +83,39 @@ public class HexUtil {
             return getRular(listResult);
         }
         if (listResult.size() == 12 && listResult.get(2).equals("03")) {
-            return getThermometer(listResult);
+            byte[] arrd = {data[10], data[9]};
+            return getThermometer(arrd);
         }
+        if (listResult.size() == 1) {
+            return getWeight(listResult);
+        }
+        Log.d("lsy", strOrResutl);
         return 0;
 
     }
 
     /**
      * Autor:Administrator
+     * CreatedTime:2019/11/22 0022
+     * UpdateTime:2019/11/22 0022 16:17
+     * Des:获取返回json对象的设备数据
+     * UpdateContent:
+     **/
+    public static String getStrResult(byte[] data, boolean addSpace) {
+        String strOrResutl = HexUtil.formatHexString(data, true);
+        List<String> listResult = Arrays.asList(strOrResutl.split(" "));
+        if (listResult.size() > 0 && listResult.get(0).equals("02")) {
+
+        }
+
+        return null;
+    }
+
+    /**
+     * Autor:Administrator
      * CreatedTime:2019/11/16 0016
      * UpdateTime:2019/11/16 0016 13:34
-     * Des:腰尺
+     * Des:腰尺 结果/100 舍去第三位
      * UpdateContent:
      **/
     private static int getRular(List<String> lisResult) {
@@ -104,6 +126,19 @@ public class HexUtil {
         return (16 * 16 * 16 * 16 - 1) * hRes + hRes + lRes;
     }
 
+    /**
+     * Autor:Administrator
+     * CreatedTime:2019/11/22 0022
+     * UpdateTime:2019/11/22 0022 16:16
+     * Des:血糖仪数据解析
+     * UpdateContent:
+     **/
+    private static String getSugerBlood(List<String> listResult) {
+
+
+        return null;
+    }
+
 
     /**
      * Autor:Administrator
@@ -112,14 +147,21 @@ public class HexUtil {
      * Des:获取体温计,字节长度11,位置2是02H
      * UpdateContent:
      **/
-    private static int getThermometer(List<String> lisResult) {
-        if (lisResult.size() == 12) {
-            int resResult = new BigInteger("ff", 16).intValue() - new BigInteger(lisResult.get(9), 16).intValue() + (new BigInteger("ff", 16).intValue() - new BigInteger(lisResult.get(10), 16).intValue()) * 16 + (new BigInteger("ff", 16).intValue() - new BigInteger(lisResult.get(11), 16).intValue()) * 16 * 16;
-            return resResult;
-        } else {
-            return 0;
-        }
+    private static int getThermometer(byte[] arrd) {
+        String strResult = HexUtil.formatHexString(arrd);
+        return new BigInteger(strResult, 16).intValue();
 
+    }
+
+    /**
+     * Autor:Administrator
+     * CreatedTime:2019/11/20 0020
+     * UpdateTime:2019/11/20 0020 9:05
+     * Des:获取体重值
+     * UpdateContent:
+     **/
+    private static int getWeight(List<String> liResult) {
+        return new BigInteger("ff", 16).intValue() - new BigInteger(liResult.get(0), 16).intValue();
     }
 
 
