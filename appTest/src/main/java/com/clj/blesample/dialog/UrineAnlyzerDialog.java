@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -20,7 +19,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.clj.blesample.R;
 import com.clj.blesample.adapter.SmartRularAdapter;
 import com.clj.fastble.data.BleDevice;
-import com.clj.fastble.data.BleMsg;
 import com.clj.fastble.service.BluetoothDeviceService;
 import com.clj.fastble.utils.HexUtil;
 
@@ -34,7 +32,7 @@ import java.util.List;
  * Des:体温计数据读取
  * UpdateContent:
  **/
-public class ThermometerRular extends Dialog {
+public class UrineAnlyzerDialog extends Dialog {
     private TextView mTitle;
     private GridView mGrid;
     private Button mRead;
@@ -49,12 +47,12 @@ public class ThermometerRular extends Dialog {
     private SmartRularAdapter adapter;
     private String mac;
 
-    public ThermometerRular(@NonNull Context context) {
+    public UrineAnlyzerDialog(@NonNull Context context) {
         super(context);
 
     }
 
-    public ThermometerRular(@NonNull Context context, int themeResId) {
+    public UrineAnlyzerDialog(@NonNull Context context, int themeResId) {
         super(context, themeResId);
     }
 
@@ -175,7 +173,9 @@ public class ThermometerRular extends Dialog {
                         dialog.show();*/
                         break;
                     case 4:
-                        onClick.getResult(HexUtil.getResult(intent.getByteArrayExtra("d_service_res_data"), true) + "");
+                        String strResult = HexUtil.getStrResult(intent.getByteArrayExtra("d_service_res_data"), true);
+
+                        onClick.getResult(HexUtil.getStrResult(intent.getByteArrayExtra("d_service_res_data"), true));
                         break;
 
                 }
