@@ -2,6 +2,7 @@ package com.clj.fastble.utils;
 
 import android.util.Log;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
@@ -101,14 +102,12 @@ public class HexUtil {
      * Des:获取返回json对象的设备数据
      * UpdateContent:
      **/
+
     public static String getStrResult(byte[] data, boolean addSpace) {
         String strOrResutl = HexUtil.formatHexString(data, true);
         List<String> listResult = Arrays.asList(strOrResutl.split(" "));
-        if (listResult.size() > 0 && listResult.get(0).equals("02")) {
+        return getSugerBlood(listResult);
 
-        }
-
-        return null;
     }
 
     /**
@@ -133,10 +132,54 @@ public class HexUtil {
      * Des:血糖仪数据解析
      * UpdateContent:
      **/
+    private static StringBuffer stringBuffer;
+
     private static String getSugerBlood(List<String> listResult) {
+        if (null == stringBuffer) {
+            stringBuffer = new StringBuffer();
+        }
+
+        for (String ite : listResult) {
+            stringBuffer.append((char) Integer.parseInt(ite, 16));
+        }
+        String strRet = stringBuffer.toString();
+        if (strRet.contains("*LEU  *LEU")) {
+            String leu = strRet.substring(strRet.indexOf("*LEU  *LEU"), strRet.indexOf("uL"));
+        }
+        if (strRet.contains("*URO  *URO")) {
+            String uro = strRet.substring(strRet.indexOf("*URO  *URO"), strRet.indexOf("dL"));
+        }
+        if (strRet.contains("*PRO  *PRO")) {
+            String pro = strRet.substring(strRet.indexOf("*PRO  *PRO"), strRet.indexOf("dL"));
+        }
+        if (strRet.contains("*BIL  *BIL")) {
+            String bil = strRet.substring(strRet.indexOf("*BIL  *BIL"), strRet.indexOf("dL"));
+        }
+
+        if (strRet.contains("*GLU  *GLU")) {
+            String glu = strRet.substring(strRet.indexOf("*GLU  *GLU"), strRet.indexOf("dL"));
+        }
+        if (strRet.contains("*ASC  *ASC")) {
+            String asc = strRet.substring(strRet.indexOf("*ASC  *ASC"), strRet.indexOf("dL"));
+        }
+        if (strRet.contains("SG    SG")) {
+
+        }
+        if (strRet.contains("KET   KET")) {
+
+        }
+        if (strRet.contains("NIT   NIT")) {
+
+        }
+        if (strRet.contains("BLO   BLO")) {
+
+        }
+        if (strRet.contains("pH    pH")) {
+
+        }
 
 
-        return null;
+        return strRet;
     }
 
 
