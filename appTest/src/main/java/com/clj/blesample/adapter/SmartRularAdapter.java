@@ -26,6 +26,7 @@ public class SmartRularAdapter extends BaseAdapter {
     private Context context;
 
     private List<BleDevice> dData;
+    private List<String> lMac = new ArrayList<String>();
     private ViewHolder viewHolder;
 
 
@@ -50,7 +51,11 @@ public class SmartRularAdapter extends BaseAdapter {
      **/
     public void addDevice(BleDevice device) {
         if (null != dData && BleManager.getInstance().isConnected(device)) {
-            dData.add(device);
+            if (!(lMac.contains(device.getMac()))) {
+                dData.add(device);
+                lMac.add(device.getMac());
+            }
+
 
         } else if (BleManager.getInstance().isConnected(device)) {
             dData = new ArrayList<BleDevice>();
@@ -69,7 +74,29 @@ public class SmartRularAdapter extends BaseAdapter {
     public void clearDevice() {
         if (null != dData) {
             dData.clear();
+            lMac.clear();
             notifyDataSetChanged();
+        }
+
+    }
+
+    /**
+     * Autor:Administrator
+     * CreatedTime:2019/11/19 0019
+     * UpdateTime:2019/11/19 0019 14:22
+     * Des:删除指定设备
+     * UpdateContent:
+     **/
+    public void delDevice(BleDevice dd) {
+        if (null != dData) {
+            for (BleDevice device : dData) {
+                if (device.getMac().equals(dd.getMac())) {
+                    dData.remove(device);
+                    notifyDataSetChanged();
+                    break;
+                }
+
+            }
         }
 
     }

@@ -40,6 +40,9 @@ import androidx.core.content.ContextCompat;
 
 import com.clj.blesample.adapter.DeviceAdapter;
 import com.clj.blesample.comm.ObserverManager;
+import com.clj.blesample.dialog.SmartRular;
+import com.clj.blesample.dialog.ThermometerRular;
+import com.clj.blesample.dialog.UrineAnlyzerDialog;
 import com.clj.blesample.operation.OperationActivity;
 import com.clj.fastble.BleManager;
 import com.clj.fastble.callback.BleGattCallback;
@@ -75,12 +78,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ProgressDialog progressDialog;
 
     private List<BleDevice> scanResultList;
+    private int index = 0;
 
     Handler handler = new Handler() {
         @Override
         public void handleMessage(@NonNull final Message msg) {
             super.handleMessage(msg);
-            if (msg.what < scanResultList.size()) {
+            if (index < scanResultList.size()) {
                 BleManager.getInstance().connect(scanResultList.get(msg.what), new BleGattCallback() {
                     @Override
                     public void onStartConnect() {
@@ -88,43 +92,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     @Override
                     public void onConnectFail(BleDevice bleDevice, BleException exception) {
-                        img_loading.clearAnimation();
-                        img_loading.setVisibility(View.INVISIBLE);
-                        btn_scan.setText(getString(R.string.start_scan));
-                        msg.what += 1;
-                        handler.sendEmptyMessage(msg.what);
+                        index += 1;
+                        handler.sendEmptyMessage(index);
                     }
 
                     @Override
                     public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
                         mDeviceAdapter.addDevice(bleDevice);
                         mDeviceAdapter.notifyDataSetChanged();
-
-                        if (msg.what <= scanResultList.size() - 1) {
-                            msg.what += 1;
-                            handler.sendEmptyMessage(msg.what);
+                        if (index < scanResultList.size()) {
+                            index += 1;
+                            handler.sendEmptyMessage(index);
                         }
                         final List<BluetoothGattService> gServicelist = gatt.getServices();
-                        if (gServicelist.size() == 4 && BluetoothGattCharacteristic.PROPERTY_NOTIFY > 0) {
+                        if (gServicelist.size() == 4 && (gServicelist.get(2).getCharacteristics().get(0).getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
                             BleManager.getInstance().notify(
                                     bleDevice,
-                                    gServicelist.get(2).getCharacteristics().get(0).getUuid().toString(),
+                                    gServicelist.get(2).getCharacteristics().get(0).getService().getUuid().toString(),
                                     gServicelist.get(2).getCharacteristics().get(0).getUuid().toString(),
                                     new BleNotifyCallback() {
 
                                         @Override
                                         public void onNotifySuccess() {
                                             Log.d("lsy", "onNotifySuccess");
+                                            img_loading.clearAnimation();
+                                            img_loading.setVisibility(View.INVISIBLE);
+                                            btn_scan.setText(getString(R.string.start_scan));
                                         }
 
                                         @Override
                                         public void onNotifyFailure(final BleException exception) {
-
+                                            Log.d("lsy", exception.getDescription());
                                         }
 
                                         @Override
                                         public void onCharacteristicChanged(byte[] data) {
-                                            Log.d("lsy", HexUtil.getResult(gServicelist.get(2).getCharacteristics().get(1).getValue(), true) + "");
+                                            Log.d("lsy", HexUtil.getResult(gServicelist.get(2).getCharacteristics().get(0).getValue(), true) + "");
                                         }
                                     });
                         }
@@ -147,6 +150,47 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
+      /*  SmartRular dialog = new SmartRular(MainActivity.this);
+        dialog.show();
+        dialog.setOnClick(new SmartRular.OnClick() {
+            @Override
+            public void click(int id) {
+
+            }
+
+            @Override
+            public void getResult(String result) {
+                btn_scan.setText(result);
+            }
+        });*/
+     /*   ThermometerRular thermometerRular = new ThermometerRular(MainActivity.this);
+        thermometerRular.show();
+        thermometerRular.setOnClick(new ThermometerRular.OnClick() {
+            @Override
+            public void click(int id) {
+
+            }
+
+            @Override
+            public void getResult(String result) {
+                btn_scan.setText(result);
+            }
+        });*/
+
+        UrineAnlyzerDialog urineAnlyzerDialog = new UrineAnlyzerDialog(MainActivity.this);
+        urineAnlyzerDialog.show();
+        urineAnlyzerDialog.setOnClick(new UrineAnlyzerDialog.OnClick() {
+            @Override
+            public void click(int id) {
+
+            }
+
+            @Override
+            public void getResult(String result) {
+                btn_scan.setText(result);
+            }
+        });
+
 
         BleManager.getInstance().init(getApplication());
         BleManager.getInstance()
@@ -336,7 +380,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onScanFinished(final List<BleDevice> scanResultList) {
                 if (scanResultList.size() > 0) {
                     MainActivity.this.scanResultList = scanResultList;
-                    handler.sendEmptyMessage(0);
+                    handler.sendEmptyMessage(index);
                 }
                 img_loading.clearAnimation();
                 img_loading.setVisibility(View.INVISIBLE);

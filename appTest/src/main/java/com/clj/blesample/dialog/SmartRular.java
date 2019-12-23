@@ -2,9 +2,6 @@ package com.clj.blesample.dialog;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,8 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -23,12 +18,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.clj.blesample.R;
 import com.clj.blesample.adapter.SmartRularAdapter;
-import com.clj.fastble.BleManager;
-import com.clj.fastble.callback.BleGattCallback;
-import com.clj.fastble.callback.BleNotifyCallback;
 import com.clj.fastble.data.BleDevice;
-import com.clj.fastble.data.BleMsg;
-import com.clj.fastble.exception.BleException;
 import com.clj.fastble.service.BluetoothDeviceService;
 import com.clj.fastble.utils.HexUtil;
 
@@ -166,32 +156,4 @@ public class SmartRular extends Dialog {
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(rdm);
     }
 
-
-/*    final List<BluetoothGattService> gServicelist = gatt.getServices();
-                        if (gServicelist.size() == 4 && (gServicelist.get(2).getCharacteristics().get(0).getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
-        BleManager.getInstance().notify(
-                bleDevice,
-                gServicelist.get(2).getCharacteristics().get(0).getService().getUuid().toString(),
-                gServicelist.get(2).getCharacteristics().get(0).getUuid().toString(),
-                new BleNotifyCallback() {
-
-                    @Override
-                    public void onNotifySuccess() {
-                        Log.d("lsy", "onNotifySuccess");
-                        img_loading.clearAnimation();
-                        img_loading.setVisibility(View.INVISIBLE);
-                        btn_scan.setText(getString(R.string.start_scan));
-                    }
-
-                    @Override
-                    public void onNotifyFailure(final BleException exception) {
-                        Log.d("lsy", exception.getDescription());
-                    }
-
-                    @Override
-                    public void onCharacteristicChanged(byte[] data) {
-                        Log.d("lsy", HexUtil.getResult(gServicelist.get(2).getCharacteristics().get(0).getValue(), true) + "");
-                    }
-                });
-    }*/
 }
