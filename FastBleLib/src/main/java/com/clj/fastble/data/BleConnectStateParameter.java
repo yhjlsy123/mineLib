@@ -1,6 +1,12 @@
 package com.clj.fastble.data;
 
-
+/**
+ * Autor:Administrator
+ * CreatedTime:2019/12/24 0024
+ * UpdateTime:2019/12/24 0024 9:31
+ * Des:蓝牙监听状态
+ * UpdateContent:
+ **/
 public class BleConnectStateParameter {
 
     private int status;
