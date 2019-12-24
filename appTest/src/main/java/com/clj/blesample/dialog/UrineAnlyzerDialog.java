@@ -100,7 +100,7 @@ public class UrineAnlyzerDialog extends Dialog {
      **/
     private void startService() {
         if (TextUtils.isEmpty(mac)) {
-            BluetoothDeviceService.startActionBaz(getContext(), null, null);
+            BluetoothDeviceService.startActionBaz(getContext(), new String[]{"ZS"}, null);
         } else {
             BluetoothDeviceService.startActionBaz(getContext(), null, mac);
         }
