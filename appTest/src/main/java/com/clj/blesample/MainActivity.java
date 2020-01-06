@@ -40,6 +40,7 @@ import androidx.core.content.ContextCompat;
 
 import com.clj.blesample.adapter.DeviceAdapter;
 import com.clj.blesample.comm.ObserverManager;
+import com.clj.blesample.dialog.SanNuoDialog;
 import com.clj.blesample.dialog.SmartRular;
 import com.clj.blesample.dialog.ThermometerRular;
 import com.clj.blesample.dialog.UrineAnlyzerDialog;
@@ -177,9 +178,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });*/
 
-        UrineAnlyzerDialog urineAnlyzerDialog = new UrineAnlyzerDialog(MainActivity.this);
+/*        UrineAnlyzerDialog urineAnlyzerDialog = new UrineAnlyzerDialog(MainActivity.this);
         urineAnlyzerDialog.show();
         urineAnlyzerDialog.setOnClick(new UrineAnlyzerDialog.OnClick() {
+            @Override
+            public void click(int id) {
+
+            }
+
+            @Override
+            public void getResult(String result) {
+                btn_scan.setText(result);
+            }
+        });*/
+        SanNuoDialog sanNuoDialog = new SanNuoDialog(MainActivity.this);
+        sanNuoDialog.show();
+        sanNuoDialog.setOnClick(new SanNuoDialog.OnClick() {
             @Override
             public void click(int id) {
 

@@ -22,6 +22,8 @@ import com.clj.fastble.data.BleDevice;
 import com.clj.fastble.service.BluetoothDeviceService;
 import com.clj.fastble.utils.HexUtil;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +34,7 @@ import java.util.List;
  * Des:体温计数据读取
  * UpdateContent:
  **/
-public class UrineAnlyzerDialog extends Dialog {
+public class SanNuoDialog extends Dialog {
     private TextView mTitle;
     private GridView mGrid;
     private Button mRead;
@@ -47,12 +49,12 @@ public class UrineAnlyzerDialog extends Dialog {
     private SmartRularAdapter adapter;
     private String mac;
 
-    public UrineAnlyzerDialog(@NonNull Context context) {
+    public SanNuoDialog(@NonNull Context context) {
         super(context);
 
     }
 
-    public UrineAnlyzerDialog(@NonNull Context context, int themeResId) {
+    public SanNuoDialog(@NonNull Context context, int themeResId) {
         super(context, themeResId);
     }
 
@@ -100,7 +102,7 @@ public class UrineAnlyzerDialog extends Dialog {
      **/
     private void startService() {
         if (TextUtils.isEmpty(mac)) {
-            BluetoothDeviceService.startActionBaz(getContext(), new String[]{"SWANon"}, null);
+            BluetoothDeviceService.startActionBaz(getContext(), new String[]{"SWANon", "Sinocareon"}, null);
         } else {
             BluetoothDeviceService.startActionBaz(getContext(), null, mac);
         }
@@ -173,9 +175,8 @@ public class UrineAnlyzerDialog extends Dialog {
                         dialog.show();*/
                         break;
                     case 4:
-                        String strResult = HexUtil.getStrResult(intent.getByteArrayExtra("d_service_res_data"), true);
-
-                        onClick.getResult(HexUtil.getStrResult(intent.getByteArrayExtra("d_service_res_data"), true));
+                        int res = HexUtil.getResult(intent.getByteArrayExtra("d_service_res_data"), true);
+                        onClick.getResult(new BigDecimal(res).setScale(1, RoundingMode.HALF_UP).floatValue() + "mmol/L");
                         break;
 
                 }
