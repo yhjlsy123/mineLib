@@ -24,4 +24,5 @@ dependencies {
     implementation 'junit:junit:4.12'
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation project(':FastBleLib')
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 }
