@@ -35,6 +35,13 @@ import java.util.Map;
 
 import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 
+/**
+ * Autor: Administrator
+ * CreatedTime: 2020/4/11 0011
+ * UpdateTime:2020/4/11 0011 14:14
+ * Des:追加测试
+ * UpdateContent:
+ **/
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class BleBluetooth {
 
