@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 btn_scan.setText(result);
             }
         });*/
-     /*   ThermometerRular thermometerRular = new ThermometerRular(MainActivity.this);
+        ThermometerRular thermometerRular = new ThermometerRular(MainActivity.this);
         thermometerRular.show();
         thermometerRular.setOnClick(new ThermometerRular.OnClick() {
             @Override
@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void getResult(String result) {
                 btn_scan.setText(result);
             }
-        });*/
+        });
 
 /*        UrineAnlyzerDialog urineAnlyzerDialog = new UrineAnlyzerDialog(MainActivity.this);
         urineAnlyzerDialog.show();
@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 btn_scan.setText(result);
             }
         });*/
-        SanNuoDialog sanNuoDialog = new SanNuoDialog(MainActivity.this);
+     /*   SanNuoDialog sanNuoDialog = new SanNuoDialog(MainActivity.this);
         sanNuoDialog.show();
         sanNuoDialog.setOnClick(new SanNuoDialog.OnClick() {
             @Override
@@ -204,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 btn_scan.setText(result);
             }
         });
-
+*/
 
         BleManager.getInstance().init(getApplication());
         BleManager.getInstance()
